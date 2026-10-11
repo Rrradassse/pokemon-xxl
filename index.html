@@ -75,6 +75,8 @@ header p{margin:.35rem 0 0;color:var(--muted);font-size:.95rem}
 .inputs label{display:grid;gap:4px;font-size:.85rem;color:var(--muted)}
 .inputs input,.inputs select{font:inherit;font-family:var(--f-mono);font-size:1.05rem;padding:.55rem .6rem;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);width:100%}
 .ivs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;grid-column:1/-1}
+.ivs label{font-size:.78rem;gap:2px}
+.inputs .ivs select{font-size:.88rem;padding:.3rem .45rem;height:2.1rem}
 .verdict{display:grid;gap:10px}
 .badge{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--f-display);font-weight:700;font-size:1.6rem;letter-spacing:.03em}
 .pill{padding:.1rem .7rem;border-radius:6px;background:var(--m)}
@@ -128,8 +130,8 @@ footer p{margin:0}
   <section class="card">
     <p class="label">Mon Pokémon <span class="ex" id="exTag">exemple</span></p>
     <form class="inputs" id="mine" autocomplete="off">
-      <label for="h">Taille (m)<input id="h" type="number" inputmode="decimal" step="0.01" min="0"></label>
       <label for="w">Poids (kg)<input id="w" type="number" inputmode="decimal" step="0.01" min="0"></label>
+      <label for="h">Taille (m)<input id="h" type="number" inputmode="decimal" step="0.01" min="0"></label>
       <div class="ivs">
         <label for="iva">Attaque<select id="iva"></select></label>
         <label for="ivd">Défense<select id="ivd"></select></label>
