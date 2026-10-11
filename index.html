@@ -76,7 +76,8 @@ header p{margin:.35rem 0 0;color:var(--muted);font-size:.95rem}
 .inputs input,.inputs select{font:inherit;font-family:var(--f-mono);font-size:1.05rem;padding:.55rem .6rem;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);width:100%}
 .ivs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;grid-column:1/-1}
 .ivs label{font-size:.78rem;gap:2px}
-.inputs .ivs select{font-size:.88rem;padding:.3rem .45rem;height:2.1rem}
+.inputs .ivs input{font-size:1rem;padding:.35rem .5rem;text-align:center}
+.inputs .ivs input.bad{border-color:var(--warn)}
 .verdict{display:grid;gap:10px}
 .badge{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--f-display);font-weight:700;font-size:1.6rem;letter-spacing:.03em}
 .pill{padding:.1rem .7rem;border-radius:6px;background:var(--m)}
@@ -133,9 +134,9 @@ footer p{margin:0}
       <label for="w">Poids (kg)<input id="w" type="number" inputmode="decimal" step="0.01" min="0"></label>
       <label for="h">Taille (m)<input id="h" type="number" inputmode="decimal" step="0.01" min="0"></label>
       <div class="ivs">
-        <label for="iva">Attaque<select id="iva"></select></label>
-        <label for="ivd">Défense<select id="ivd"></select></label>
-        <label for="ivs">PV<select id="ivs"></select></label>
+        <label for="iva">IV Attaque<input id="iva" class="iv" type="text" inputmode="numeric" maxlength="2" placeholder="0–15"></label>
+        <label for="ivd">IV Défense<input id="ivd" class="iv" type="text" inputmode="numeric" maxlength="2" placeholder="0–15"></label>
+        <label for="ivs">IV PV<input id="ivs" class="iv" type="text" inputmode="numeric" maxlength="2" placeholder="0–15"></label>
       </div>
     </form>
     <div class="verdict" id="verdict"></div>
@@ -258,7 +259,14 @@ function renderFam(){
 }
 
 // --- calcul
-['iva','ivd','ivs'].forEach(id=>{const s=$(id); s.innerHTML='<option value="">—</option>'+Array.from({length:16},(_,k)=>`<option>${15-k}</option>`).join('')});
+// IV : saisie au clavier numérique, passage automatique à la case suivante
+const ivIds=['iva','ivd','ivs'];
+ivIds.forEach((id,k)=>{const el=$(id);
+  el.addEventListener('input',()=>{el.value=el.value.replace(/\D/g,'');
+    const v=el.value, n=+v, ok=v===''||n<=15; el.classList.toggle('bad',!ok);
+    if(ok&&v!==''&&(v.length===2||n>=2)&&ivIds[k+1]) $(ivIds[k+1]).focus();});
+  el.addEventListener('focus',()=>el.select());});
+const ivVal=id=>{const v=$(id).value; return v===''||+v>15?null:+v};
 ['h','w','iva','ivd','ivs'].forEach(id=>$(id).addEventListener('input',()=>{example=false;compute()}));
 $('mine').addEventListener('submit',e=>e.preventDefault());
 function cls(p,h){ if(h>p.xl) return 'XXL'; if(h>p.mu) return 'XL'; if(h>=p.ml) return 'M'; if(h>=p.xs) return 'XS'; return 'XXS'; }
@@ -275,8 +283,8 @@ function compute(){
   const deg = k==='XXL' ? Math.min(100,Math.max(0,(h-p.xl)/(p.xxl-p.xl)*100)) : null;
   const hp=Math.min(800, 800*ratio/c);
   const wp= w>0 ? Math.min(150, 150*(w/p.wr)/(c+0.5)) : null;
-  const ivv=['iva','ivd','ivs'].map(id=>$(id).value); const ivKnown=ivv.every(v=>v!=='');
-  const ivp= ivKnown ? 50*ivv.reduce((a,b)=>a+ +b,0)/45 : null;
+  const ivv=ivIds.map(ivVal); const ivKnown=ivv.every(v=>v!==null);
+  const ivp= ivKnown ? 50*ivv.reduce((a,b)=>a+b,0)/45 : null;
   const bonus = k==='XXL'?178:0;
   const total = hp+(wp??0)+(ivp??0)+bonus;
   const over = h>p.xxl+0.005;
