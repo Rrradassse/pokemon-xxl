@@ -242,7 +242,7 @@ function render(){
 function drawRuler(){
   const p=cur, lo=p.xxs, hi=p.xxl, span=hi-lo||1, pos=x=>(x-lo)/span*100;
   const cuts=[[p.xxs,p.xs,'XXS','b-xxs'],[p.xs,p.ml,'XS','b-xs'],[p.ml,p.mu,'M','b-m'],[p.mu,p.xl,'XL','b-xl'],[p.xl,p.xxl,'XXL','b-xxl']];
-  $('bands').innerHTML=cuts.filter(c=>c[1]>c[0]).map(c=>`<div class="${c[3]}" style="flex:${c[1]-c[0]}">${(c[1]-c[0])/span>0.06?c[2]:''}</div>`).join('');
+  $('bands').innerHTML=cuts.filter(c=>c[1]>c[0]).map(c=>`<div class="${c[3]}" style="flex:0 0 ${(c[1]-c[0])/span*100}%">${(c[1]-c[0])/span>0.06?c[2]:''}</div>`).join('');
   const ticks=[...new Set([p.xxs,p.ml,p.mu,p.xl,p.xxl])];
   $('ticks').innerHTML=ticks.map((t,i)=>`<span class="${i===0?'first':i===ticks.length-1?'last':''}" style="left:${pos(t)}%">${fmt(t,2)}</span>`).join('');
   $('ruler').dataset.lo=lo; $('ruler').dataset.span=span;
