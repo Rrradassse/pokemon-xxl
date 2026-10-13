@@ -6,8 +6,11 @@
 
 - Recherche par nom français (accents facultatifs, fautes de frappe tolérées) ou n° du Pokédex
 - Taille et poids moyens, seuil XXL, taille max et poids max de chaque espèce et forme
-- Catégorie (XXS → XXL), degré XXL et score d'Exposition estimé à partir de la taille, du poids et des IV
+- Catégorie (XXS → XXL), degré XXL et score d'Exposition estimé en fourchette à partir de la taille, du poids et des IV
+- IV total en pourcentage
 - Famille d'évolution
+
+Historique des changements : voir le [journal des mises à jour](CHANGELOG.md).
 
 Pour l'installer comme une appli : ouvrir le lien dans le navigateur du téléphone, puis « Ajouter à l'écran d'accueil ».
 
