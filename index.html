@@ -281,12 +281,18 @@ function compute(){
   const c=coef(p), ratio=h/p.hr, k=cls(p,h);
   const edge=[p.ml,p.mu,p.xl].some(t=>Math.abs(h-t)<=0.005);
   const deg = k==='XXL' ? Math.min(100,Math.max(0,(h-p.xl)/(p.xxl-p.xl)*100)) : null;
-  const hp=Math.min(800, 800*ratio/c);
-  const wp= w>0 ? Math.min(150, 150*(w/p.wr)/(c+0.5)) : null;
+  // Le jeu affiche taille et poids arrondis : la vraie valeur est à ± une demi-unité du dernier chiffre affiché
+  const tol=id=>{const s=String($(id).value).replace(',','.'); const d=(s.split('.')[1]||'').length; return 0.5*Math.pow(10,-d)};
+  const th=tol('h'), tw=tol('w');
+  const hpAt=x=>Math.min(800, 800*(x/p.hr)/c), wpAt=x=>Math.min(150, 150*(x/p.wr)/(c+0.5));
+  const hp=hpAt(h), hpLo=hpAt(h-th), hpHi=hpAt(h+th);
+  const wp= w>0 ? wpAt(w) : null, wpLo= w>0 ? wpAt(w-tw) : 0, wpHi= w>0 ? wpAt(w+tw) : 0;
   const ivv=ivIds.map(ivVal); const ivKnown=ivv.every(v=>v!==null);
   const ivp= ivKnown ? 50*ivv.reduce((a,b)=>a+b,0)/45 : null;
   const bonus = k==='XXL'?178:0;
   const total = hp+(wp??0)+(ivp??0)+bonus;
+  const totLo = hpLo+wpLo+(ivp??0)+bonus, totHi = hpHi+wpHi+(ivp??0)+bonus;
+  const rng=(a,b)=>Math.round(b)-Math.round(a)>=1?`${fmt(a,0)} – ${fmt(b,0)}`:fmt((a+b)/2,0);
   const over = h>p.xxl+0.005;
   out.innerHTML = `
     <div class="badge"><span class="pill ${k}">${k}</span><span class="num" style="font-size:1rem">× ${fmt(ratio,3)} la taille moyenne</span></div>
@@ -295,12 +301,13 @@ function compute(){
     ${deg!==null?`<div><div class="score"><span>Degré XXL (seuil → max)</span><span class="r">${fmt(deg,0)} %</span></div><div class="gauge"><div style="width:${deg}%"></div></div></div>`:
       `<p class="note">Il manque ${fmt(Math.max(0,p.xl-h),3)} m pour passer XXL (seuil ${fmt(p.xl,3)} m).</p>`}
     <div class="score">
-      <span>Taille (sur 800)</span><span class="r">${fmt(hp,1)}</span>
-      <span>Poids (sur 150)</span><span class="r">${wp===null?'—':fmt(wp,1)}</span>
+      <span>Taille (sur 800)</span><span class="r">${rng(hpLo,hpHi)}</span>
+      <span>Poids (sur 150)</span><span class="r">${wp===null?'—':rng(wpLo,wpHi)}</span>
       <span>IV (sur 50)</span><span class="r">${ivp===null?'—':fmt(ivp,1)}</span>
       <span>Bonus XXL</span><span class="r">${bonus?'+178':'0'}</span>
-      <span class="tot">Score Exposition estimé</span><span class="r tot">${fmt(total,1)}${(wp===null||ivp===null)?' *':''}</span>
+      <span class="tot">Score Exposition estimé</span><span class="r tot">${rng(totLo,totHi)}${(wp===null||ivp===null)?' *':''}</span>
     </div>
+    <p class="note">Le jeu arrondit la taille au centimètre : ici 1 cm vaut ${fmt(800/(p.xxl*100),1)} points, d'où une fourchette. Le score affiché au PokéStop tombe dedans.</p>
     ${(wp===null||ivp===null)?'<p class="note">* Score partiel : ajoute le poids et les IV pour le total complet.</p>':''}`;
 }
 
