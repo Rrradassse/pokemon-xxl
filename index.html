@@ -17,7 +17,7 @@
 :root{
   --bg:#eef1ec; --paper:#fbfcf9; --ink:#1d2621; --muted:#5d6a62; --line:#cdd5cf;
   --accent:#1f6f5c; --accent-ink:#ffffff; --xxl:#d9a21b; --xl:#8fb3a2; --m:#d7dfd9; --xs:#b9c4d6; --xxs:#93a3bf;
-  --warn:#a5461f; --good:#1f6f5c;
+  --warn:#a5461f; --good:#1f6f5c; --callout:#fbf1d3;
   --f-display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
   --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
@@ -25,11 +25,11 @@
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#121815; --paper:#1a221e; --ink:#e4ebe6; --muted:#9aa8a0; --line:#2f3b35;
   --accent:#5cc3a6; --accent-ink:#0d1512; --xxl:#e8b73a; --xl:#4d7a68; --m:#2c3732; --xs:#3d4a63; --xxs:#56678a;
-  --warn:#e58a5f; --good:#5cc3a6; color-scheme:dark}}
+  --warn:#e58a5f; --good:#5cc3a6; --callout:#3a321a; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#121815; --paper:#1a221e; --ink:#e4ebe6; --muted:#9aa8a0; --line:#2f3b35;
   --accent:#5cc3a6; --accent-ink:#0d1512; --xxl:#e8b73a; --xl:#4d7a68; --m:#2c3732; --xs:#3d4a63; --xxs:#56678a;
-  --warn:#e58a5f; --good:#5cc3a6; color-scheme:dark}
+  --warn:#e58a5f; --good:#5cc3a6; --callout:#3a321a; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.45}
 .wrap{max-width:640px;margin:0 auto;padding-inline:16px;padding-block:20px 48px;display:grid;gap:18px}
@@ -76,6 +76,17 @@ header p{margin:.35rem 0 0;color:var(--muted);font-size:.95rem}
 .inputs input,.inputs select{font:inherit;font-family:var(--f-mono);font-size:1.05rem;padding:.55rem .6rem;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);width:100%}
 .ivs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) minmax(0,.9fr);gap:8px;grid-column:1/-1}
 .ivtot{display:grid;gap:2px;font-size:.78rem;color:var(--muted)}
+.amb{grid-column:1/-1;display:grid;gap:10px;padding:12px;border-radius:10px;border:2px solid var(--xxl);background:var(--callout)}
+.amb p{margin:0;font-weight:700;font-size:.95rem;color:var(--ink)}
+.amb .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.amb button{font:inherit;font-family:var(--f-display);font-weight:700;font-size:1.3rem;letter-spacing:.04em;padding:.45rem;border-radius:8px;border:2px solid var(--ink);background:var(--paper);color:var(--ink);cursor:pointer}
+.amb button[aria-pressed="true"].XXL{background:var(--xxl);border-color:var(--xxl);color:#1d1a10}
+.amb button[aria-pressed="true"].XL{background:var(--xl);border-color:var(--xl)}
+.amb button[aria-pressed="true"].M,.amb button[aria-pressed="true"].XS,.amb button[aria-pressed="true"].XXS{background:var(--ink);color:var(--paper)}
+.amb.done{border-color:var(--line);background:transparent}
+.amb.done p{font-weight:400;color:var(--muted);font-size:.85rem}
+@media (prefers-reduced-motion: no-preference){.amb:not(.done){animation:nudge 1.6s ease-in-out 2}}
+@keyframes nudge{50%{box-shadow:0 0 0 4px var(--xxl)}}
 .ivtot output{font-family:var(--f-mono);font-weight:600;font-size:1.05rem;color:var(--ink);display:flex;align-items:center;justify-content:center;border-radius:8px;background:var(--m);padding:.35rem .3rem;font-variant-numeric:tabular-nums;white-space:nowrap}
 .ivtot output.top{background:var(--xxl);color:#1d1a10}
 .ivs label{font-size:.78rem;gap:2px}
@@ -136,6 +147,7 @@ footer p{margin:0}
     <form class="inputs" id="mine" autocomplete="off">
       <label for="w">Poids (kg)<input id="w" type="number" inputmode="decimal" step="0.01" min="0"></label>
       <label for="h">Taille (m)<input id="h" type="number" inputmode="decimal" step="0.01" min="0"></label>
+      <div id="ambBox" class="amb" role="group" aria-labelledby="ambQ" hidden></div>
       <div class="ivs">
         <label for="iva">IV Attaque<input id="iva" class="iv" type="text" inputmode="numeric" maxlength="2" placeholder="0–15"></label>
         <label for="ivd">IV Défense<input id="ivd" class="iv" type="text" inputmode="numeric" maxlength="2" placeholder="0–15"></label>
@@ -286,7 +298,7 @@ function compute(){
     if(v.every(x=>x!==null)){const s=v[0]+v[1]+v[2]; o.textContent=Math.round(s/45*100)+' %'; o.title=s+'/45'; o.classList.toggle('top',s===45)}
     else {o.textContent='—'; o.title=''; o.classList.remove('top')}
   }
-  const mk=$('marker'), out=$('verdict');
+  const mk=$('marker'), out=$('verdict'); $('ambBox').hidden=true;
   if(special(p)){mk.hidden=true; out.innerHTML='<p class="note">Pas de score XXL calculable pour cette forme.</p>'; return}
   if(!(h>0)){mk.hidden=true; out.innerHTML=`<p class="note">Saisis la taille et le poids lus sur la fiche du Pokémon dans le jeu, et ses IV si tu les connais (évaluation du chef d'équipe).</p>`; return}
   const lo=+$('ruler').dataset.lo, span=+$('ruler').dataset.span;
@@ -314,8 +326,6 @@ function compute(){
   const over = h>p.xxl+0.005;
   out.innerHTML = `
     <div class="badge"><span class="pill ${k}">${amb&&!badge?'?':k}</span><span class="num" style="font-size:1rem">× ${fmt(ratio,3)} la taille moyenne</span></div>
-    ${amb?`<div class="amb"><p class="note warn">${fmt(h)} m est pile sur le seuil ${kLo} / ${kHi} : quel badge affiche le jeu au-dessus de la taille ?</p>
-      <div class="forms">${[kLo,kHi].map(x=>`<button type="button" class="chip" data-badge="${x}" aria-pressed="${badge===x}">${x}</button>`).join('')}</div></div>`:''}
     ${over?`<p class="note warn">Cette taille dépasse le maximum de l'espèce (${fmt(p.xxl,3)} m) : vérifie la forme choisie ou la saisie.</p>`:''}
     ${deg!==null?`<div><div class="score"><span>Degré XXL (seuil → max)</span><span class="r">${fmt(deg,0)} %</span></div><div class="gauge"><div style="width:${deg}%"></div></div></div>`:
       (h<p.xl?`<p class="note">Il manque ${fmt(p.xl-h,3)} m pour passer XXL (seuil ${fmt(p.xl,3)} m).</p>`:'')}
@@ -328,7 +338,12 @@ function compute(){
     </div>
     <p class="note">Le jeu arrondit la taille au centimètre : ici 1 cm vaut ${fmt(800/(p.xxl*100),1)} points, d'où une fourchette. Le score affiché au PokéStop tombe dedans.</p>
     ${(wp===null||ivp===null)?'<p class="note">* Score partiel : ajoute le poids et les IV pour le total complet.</p>':''}`;
-  out.querySelectorAll('[data-badge]').forEach(b=>b.onclick=()=>{badge=b.dataset.badge; compute()});
+  const box=$('ambBox'); box.hidden=!amb; box.classList.toggle('done',!!badge);
+  if(amb){
+    box.innerHTML=`<p id="ambQ">${badge?`Badge du jeu : ${badge}. Touche l'autre si tu t'es trompée.`:`${fmt(h)} m est pile sur le seuil ${kLo} / ${kHi} : quel badge affiche le jeu au-dessus de la taille ?`}</p>
+      <div class="btns">${[kLo,kHi].map(x=>`<button type="button" class="${x}" data-badge="${x}" aria-pressed="${badge===x}">${x}</button>`).join('')}</div>`;
+    box.querySelectorAll('[data-badge]').forEach(b=>b.onclick=()=>{badge=b.dataset.badge; compute()});
+  }
 }
 
 // --- démarrage : dernier Pokémon consulté, lien #n°, ou exemple Pikachu
