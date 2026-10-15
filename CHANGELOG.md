@@ -1,5 +1,9 @@
 # Journal des mises à jour
 
+## 15 octobre 2026
+
+- **Avis des testeurs** : bouton « Testeur ? Donner mon avis → » sous le titre, qui ouvre le questionnaire.
+
 ## 13 octobre 2026
 
 - **Score en fourchette** : le jeu arrondit la taille au centimètre et le poids à la décimale affichée. Le score d'Exposition s'affiche donc entre deux valeurs, et le score réel du PokéStop tombe dedans (exemple : Galvaran 0,85 m → 1 101 – 1 110, score réel 1 103).
