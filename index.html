@@ -36,6 +36,9 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1
 header h1{font-family:var(--f-display);font-weight:700;font-size:2.4rem;letter-spacing:.02em;margin:0;line-height:1;text-transform:uppercase}
 header h1 span{color:var(--xxl)}
 header p{margin:.35rem 0 0;color:var(--muted);font-size:.95rem}
+.avis{display:inline-block;margin-top:.6rem;padding:.35rem .8rem;border-radius:999px;border:1.5px solid var(--accent);color:var(--accent);font-weight:700;font-size:.88rem;text-decoration:none}
+.avis:hover{background:var(--accent);color:var(--accent-ink)}
+.avis:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .search{position:relative}
 .search input{width:100%;font:inherit;font-size:1.1rem;padding:.8rem 1rem;border:2px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink)}
 .search input:focus{outline:none;border-color:var(--accent)}
@@ -121,6 +124,7 @@ footer p{margin:0}
   <header>
     <h1>Toise <span>XXL</span></h1>
     <p>Seuils de taille, taille et poids max, et score d'Exposition estimé pour chaque Pokémon de Pokémon GO.</p>
+    <a class="avis" href="https://forms.gle/ZEJp86LagACUakpj7" target="_blank" rel="noopener">Testeur ? Donner mon avis →</a>
   </header>
 
   <div class="search">
