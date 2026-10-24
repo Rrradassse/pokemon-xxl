@@ -7,6 +7,13 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Toise XXL">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="icons/favicon-64.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta property="og:title" content="Toise XXL">
+<meta property="og:description" content="Seuils XXL, taille et poids max et score d'Exposition estimé pour chaque Pokémon de Pokémon GO.">
+<meta property="og:image" content="https://rrradassse.github.io/pokemon-xxl/icons/logo-detail-512.png">
 <meta name="description" content="Seuils XXL, taille et poids max et score d'Exposition estimé pour chaque Pokémon de Pokémon GO.">
 <style>body{margin:0}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 <title>Toise XXL</title>
@@ -36,6 +43,8 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1
 .wrap{max-width:640px;margin:0 auto;padding-inline:16px;padding-block:20px 48px;display:grid;gap:18px}
 header h1{font-family:var(--f-display);font-weight:700;font-size:2.4rem;letter-spacing:.02em;margin:0;line-height:1;text-transform:uppercase}
 header h1 span{color:var(--xxl)}
+.brand{display:flex;align-items:center;gap:12px}
+.brand img{width:64px;height:64px;border-radius:15px;flex:none;box-shadow:0 1px 3px rgba(0,0,0,.18)}
 header p{margin:.35rem 0 0;color:var(--muted);font-size:.95rem}
 .avis{display:inline-block;margin-top:.6rem;padding:.35rem .8rem;border-radius:999px;border:1.5px solid var(--accent);color:var(--accent);font-weight:700;font-size:.88rem;text-decoration:none}
 .avis:hover{background:var(--accent);color:var(--accent-ink)}
@@ -177,7 +186,7 @@ footer p{margin:0}
 <body>
 <div class="wrap">
   <header>
-    <h1>Toise <span>XXL</span></h1>
+    <div class="brand"><img src="icons/logo-128.png" width="64" height="64" alt=""><h1>Toise <span>XXL</span></h1></div>
     <p>Seuils de taille, taille et poids max, et score d'Exposition estimé pour chaque Pokémon de Pokémon GO.</p>
     <a class="avis" href="https://forms.gle/ZEJp86LagACUakpj7" target="_blank" rel="noopener">Testeur ? Donner mon avis →</a>
   </header>

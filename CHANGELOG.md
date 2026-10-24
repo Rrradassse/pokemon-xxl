@@ -1,5 +1,9 @@
 # Journal des mises à jour
 
+## 24 octobre 2026 (soir)
+
+- **Logo** : nouveau logo à côté du titre, et vraie icône sur l'écran d'accueil du téléphone et dans l'onglet du navigateur (à la place du « G » gris). Pour l'avoir sur un raccourci déjà créé : le supprimer puis l'ajouter de nouveau à l'écran d'accueil.
+
 ## 24 octobre 2026
 
 - **Mes derniers Pokémon** : bouton « Ajouter à ma liste » sous le score. Les 20 derniers Pokémon ajoutés s'affichent dans un tableau (score, degré XXL, IV, taille et poids), gardé sur le téléphone. Tri par date, score, degré XXL ou IV (aussi en touchant l'en-tête de colonne), filtre « Même espèce », suppression une à une ou « Tout effacer » (avec confirmation). Toucher un nom recharge le Pokémon dans le calculateur.

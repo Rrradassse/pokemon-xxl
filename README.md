@@ -1,5 +1,7 @@
 # pokemon-xxl
 
+<img src="icons/logo-detail-512.png" alt="Logo Toise XXL" width="160">
+
 Évaluer le degré de XXL de ton Pokémon sur Pokémon GO.
 
 **Ouvrir l'outil : https://rrradassse.github.io/pokemon-xxl/**
