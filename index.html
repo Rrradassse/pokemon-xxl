@@ -138,6 +138,11 @@ footer p{margin:0}
 .lscore{font-family:var(--f-mono);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
 .lrow2{font-family:var(--f-mono);font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .lrow2 .nw{white-space:nowrap}
+.inputs .full{grid-column:1/-1}
+.inputs .opt{font-size:.75rem;opacity:.8}
+.inputs #tag{font-family:var(--f-body)}
+.ltab .ltag{font:inherit;font-family:var(--f-mono);font-size:.72rem;margin-top:3px;padding:1px 6px;border-radius:5px;border:1px solid var(--line);background:var(--paper);color:var(--ink);text-decoration:none;cursor:pointer;max-width:5.5rem;white-space:normal;overflow-wrap:anywhere;text-align:left;display:block}
+.toast{margin:0;padding:8px 10px;border-radius:8px;background:var(--ink);color:var(--paper);font-size:.85rem}
 .ltab{overflow-x:auto;margin-inline:-4px}
 .ltab table{width:100%;border-collapse:collapse;font-size:.85rem}
 .ltab th{padding:6px 4px;vertical-align:bottom;line-height:1.15}
@@ -148,7 +153,7 @@ footer p{margin:0}
 .ltab td{padding:7px 4px;vertical-align:middle;white-space:nowrap}
 .ltab td.n,.ltab th.n{text-align:right}
 .ltab td.on{font-weight:700;color:var(--ink)}
-.ltab td.pk{white-space:normal;min-width:6rem;font-family:var(--f-body)}
+.ltab td.pk{white-space:normal;min-width:5.5rem;font-family:var(--f-body)}
 .ltab tr.cur td{background:var(--m)}
 .ltab .lopen{color:var(--ink);text-decoration:none;text-align:left;padding:0;display:grid;gap:2px;font-weight:700}
 .ltab .lopen small{font-family:var(--f-mono);font-weight:400;color:var(--muted);font-size:.72rem;display:flex;gap:5px;align-items:center}
@@ -198,6 +203,7 @@ footer p{margin:0}
   <section class="card">
     <p class="label">Mon Pokémon <span class="ex" id="exTag">exemple</span></p>
     <form class="inputs" id="mine" autocomplete="off">
+      <label for="tag" class="full">PC ou surnom <span class="opt">facultatif, pour le retrouver dans ta liste</span><input id="tag" type="text" maxlength="20" placeholder="ex. 374 ou Gros Paras" autocapitalize="sentences" enterkeyhint="next"></label>
       <label for="w">Poids (kg)<input id="w" type="number" inputmode="decimal" step="0.01" min="0"></label>
       <label for="h">Taille (m)<input id="h" type="number" inputmode="decimal" step="0.01" min="0"></label>
       <div id="ambBox" class="amb" role="group" aria-labelledby="ambQ" hidden></div>
@@ -228,6 +234,7 @@ footer p{margin:0}
       </div>
       <button type="button" class="chip" id="lSame" aria-pressed="false">Même espèce</button>
     </div>
+    <p class="toast" id="lToast" role="status" hidden></p>
     <p class="note" id="lLegend">Score = ce que compte l'Exposition (taille, poids, IV, bonus XXL) · Degré XXL = la taille seule.</p>
     <div class="ltab" id="lTab"><table>
       <thead><tr>
@@ -314,7 +321,7 @@ q.addEventListener('keydown',e=>{
 q.addEventListener('blur',()=>setTimeout(()=>sugg.hidden=true,100));
 function pick(p,keepInputs){
   q.value=''; hits=[]; sugg.hidden=true; cur=p; badge=null;
-  if(!keepInputs){example=false; $('h').value=''; $('w').value=''}
+  if(!keepInputs){example=false; $('h').value=''; $('w').value=''; $('tag').value=''}
   try{localStorage.setItem('toise-last',p.i)}catch(e){}
   try{history.replaceState(null,'','#'+p.n)}catch(e){}
   render(); q.blur();
@@ -372,7 +379,7 @@ ivIds.forEach((id,k)=>{const el=$(id);
   el.addEventListener('focus',()=>el.select());});
 const ivVal=id=>{const v=$(id).value; return v===''||+v>15?null:+v};
 let badge=null; // badge XL/XXL lu dans le jeu, quand l'arrondi ne permet pas de trancher
-['h','w','iva','ivd','ivs'].forEach(id=>$(id).addEventListener('input',()=>{example=false; if(id==='h') badge=null; compute()}));
+['h','w','iva','ivd','ivs','tag'].forEach(id=>$(id).addEventListener('input',()=>{example=false; if(id==='h') badge=null; compute()}));
 $('mine').addEventListener('submit',e=>e.preventDefault());
 function cls(p,h){ if(h>p.xl) return 'XXL'; if(h>p.mu) return 'XL'; if(h>=p.ml) return 'M'; if(h>=p.xs) return 'XS'; return 'XXS'; }
 function compute(){
@@ -426,7 +433,7 @@ function compute(){
     <div class="addrow"><button type="button" class="addbtn" id="addBtn">＋ Ajouter à ma liste</button><span class="addmsg" id="addMsg" role="status"></span></div>`;
   // résultat courant, prêt à être ajouté à la liste
   const ivs=ivv.every(v=>v!==null)?ivv:null;
-  last={n:p.n,f:p.f,w:$('w').value,h:$('h').value,iv:ivs,badge:amb?badge:null,k,deg,ratio,
+  last={n:p.n,f:p.f,tag:$('tag').value.trim(),w:$('w').value,h:$('h').value,iv:ivs,badge:amb?badge:null,k,deg,ratio,
         lo:totLo,hi:totHi,partial:(wp===null||ivp===null),pct:ivs?Math.round((ivs[0]+ivs[1]+ivs[2])/45*100):null};
   const ab=$('addBtn');
   if(amb&&!badge){ab.disabled=true; $('addMsg').textContent='Choisis d\'abord le badge XL ou XXL.'}
@@ -446,7 +453,18 @@ let last=null, list=[], lSort='recent', lSame=false, lPending=null;
 function lLoad(){try{const v=JSON.parse(localStorage.getItem(LKEY)||'[]'); list=Array.isArray(v)?v:[]}catch(e){list=[]}}
 function lSave(){try{localStorage.setItem(LKEY,JSON.stringify(list))}catch(e){}}
 try{const s=localStorage.getItem('toise-tri'); if(['recent','score','deg','iv'].includes(s)) lSort=s}catch(e){}
-const sameKey=e=>[e.n,e.f,e.w,e.h,(e.iv||[]).join('/'),e.badge||''].join('|');
+const sameKey=e=>[e.n,e.f,e.tag||'',e.w,e.h,(e.iv||[]).join('/'),e.badge||''].join('|');
+// PC ou surnom : un nombre est un PC (recherche « pc374 » dans le jeu), sinon c'est un surnom
+const isPC=s=>/^\d{1,5}$/.test(s);
+const tagLabel=s=>isPC(s)?'PC '+s:'« '+s+' »';
+const searchOf=s=>isPC(s)?'pc'+s:s;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function copySearch(s){
+  const say=m=>{const el=$('lToast'); el.textContent=m; el.hidden=false; clearTimeout(copySearch.t); copySearch.t=setTimeout(()=>el.hidden=true,3500)};
+  const ok=()=>say(`Copié : « ${s} ». Colle-le dans la recherche de ton stockage Pokémon GO.`);
+  const ko=()=>say(`Tape « ${s} » dans la recherche de ton stockage Pokémon GO.`);
+  try{navigator.clipboard.writeText(s).then(ok,ko)}catch(e){ko()}
+}
 function findSame(e){return list.find(x=>sameKey(x)===sameKey(e))}
 function addCurrent(){
   if(!last||findSame(last)) return;
@@ -482,7 +500,7 @@ function renderList(){
     const a=Math.round(e.lo), z=Math.round(e.hi);
     return `<tr class="${p&&p===cur?'cur':''}">
       <td class="pk"><button type="button" class="lopen" data-open="${e.id}" aria-label="Recharger ${nm}">${nm}
-        <small><span class="pill ${e.k}">${e.k}</span>${d(e.t)}</small></button></td>
+        <small><span class="pill ${e.k}">${e.k}</span>${e.tag?'':d(e.t)}</small></button>${e.tag?`<button type="button" class="ltag" data-copy="${esc(searchOf(e.tag))}" title="Copier pour la recherche du jeu">${esc(tagLabel(e.tag))}</button>`:''}</td>
       <td class="n sc${on('score')}">${fmt(mid(e),0)}${e.partial?'*':''}${z-a>=1?`<small>${fmt(e.lo,0)}–${fmt(e.hi,0)}</small>`:''}</td>
       <td class="n${on('deg')}">${e.deg!==null?fmt(e.deg,0):'—'}</td>
       <td class="n${on('iv')}">${e.pct!==null?e.pct:'—'}</td>
@@ -491,12 +509,13 @@ function renderList(){
     </tr>`}).join('')
     : `<tr><td colspan="6" class="pk">Aucun ${full(sp)} dans ta liste.</td></tr>`;
   tb.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{list=list.filter(e=>e.id!==b.dataset.del); lSave(); renderList(); compute()});
+  tb.querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>copySearch(b.dataset.copy));
   tb.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openEntry(list.find(e=>e.id===b.dataset.open)));
 }
 function openEntry(e){
   const p=entryPoke(e); if(!p) return;
   pick(p,true); example=false;
-  $('w').value=e.w||''; $('h').value=e.h;
+  $('w').value=e.w||''; $('h').value=e.h; $('tag').value=e.tag||'';
   ivIds.forEach((id,k)=>$(id).value=e.iv?String(e.iv[k]):'');
   badge=e.badge||null; compute(); renderList();
   $('mine').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
