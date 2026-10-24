@@ -32,6 +32,7 @@
   --warn:#e58a5f; --good:#5cc3a6; --callout:#3a321a; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.45}
+.wrap>*{min-width:0}
 .wrap{max-width:640px;margin:0 auto;padding-inline:16px;padding-block:20px 48px;display:grid;gap:18px}
 header h1{font-family:var(--f-display);font-weight:700;font-size:2.4rem;letter-spacing:.02em;margin:0;line-height:1;text-transform:uppercase}
 header h1 span{color:var(--xxl)}
@@ -137,6 +138,26 @@ footer p{margin:0}
 .lscore{font-family:var(--f-mono);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
 .lrow2{font-family:var(--f-mono);font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .lrow2 .nw{white-space:nowrap}
+.ltab{overflow-x:auto;margin-inline:-4px}
+.ltab table{width:100%;border-collapse:collapse;font-size:.85rem}
+.ltab th{padding:6px 4px;vertical-align:bottom;line-height:1.15}
+.ltab th small{font-weight:400;text-transform:none;letter-spacing:0}
+.ltab th button{font:inherit;text-transform:inherit;letter-spacing:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px}
+.ltab th.on{color:var(--accent)}
+.ltab th.on button::after{content:" ▼";font-size:.7em}
+.ltab td{padding:7px 4px;vertical-align:middle;white-space:nowrap}
+.ltab td.n,.ltab th.n{text-align:right}
+.ltab td.on{font-weight:700;color:var(--ink)}
+.ltab td.pk{white-space:normal;min-width:6rem;font-family:var(--f-body)}
+.ltab tr.cur td{background:var(--m)}
+.ltab .lopen{color:var(--ink);text-decoration:none;text-align:left;padding:0;display:grid;gap:2px;font-weight:700}
+.ltab .lopen small{font-family:var(--f-mono);font-weight:400;color:var(--muted);font-size:.72rem;display:flex;gap:5px;align-items:center}
+.ltab .lopen .pill{font-family:var(--f-display);font-weight:700;font-size:.72rem;padding:0 .3rem;border-radius:4px;color:var(--ink)}
+.ltab .lopen .pill.XXL{color:#1d1a10}
+.ltab td.tw small{display:block;font-size:.72rem;color:var(--muted)}
+.ltab td.sc small{display:block;font-size:.68rem;color:var(--muted);font-weight:400}
+.ltab .ldel{color:var(--muted);text-decoration:none;width:30px;height:34px;border:0;border-radius:8px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .ldel{font:inherit;font-size:1.1rem;width:44px;border:0;border-left:1px solid var(--line);background:none;color:var(--muted);cursor:pointer;border-radius:0 10px 10px 0}
 .ldel:hover{color:var(--warn)}
 .lfoot{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
@@ -203,10 +224,22 @@ footer p{margin:0}
         <button type="button" data-sort="recent" aria-pressed="true">Récents</button>
         <button type="button" data-sort="score" aria-pressed="false">Score</button>
         <button type="button" data-sort="deg" aria-pressed="false">Degré XXL</button>
+        <button type="button" data-sort="iv" aria-pressed="false">IV</button>
       </div>
       <button type="button" class="chip" id="lSame" aria-pressed="false">Même espèce</button>
     </div>
-    <ul class="lst" id="lList"></ul>
+    <p class="note" id="lLegend">Score = ce que compte l'Exposition (taille, poids, IV, bonus XXL) · Degré XXL = la taille seule.</p>
+    <div class="ltab" id="lTab"><table>
+      <thead><tr>
+        <th scope="col">Pokémon</th>
+        <th scope="col" class="n"><button type="button" data-sort="score">Score</button></th>
+        <th scope="col" class="n"><button type="button" data-sort="deg">XXL</button><br><small>%</small></th>
+        <th scope="col" class="n"><button type="button" data-sort="iv">IV</button><br><small>%</small></th>
+        <th scope="col" class="n">Taille<br><small>m · kg</small></th>
+        <th scope="col"><span class="sr">Supprimer</span></th>
+      </tr></thead>
+      <tbody id="lList"></tbody>
+    </table></div>
     <p class="note" id="lEmpty">Ta liste est vide. Saisis un Pokémon, puis touche « Ajouter à ma liste » sous le score pour le comparer plus tard.</p>
     <div class="lfoot" id="lFoot">
       <button type="button" class="lclear" id="lClear">Tout effacer</button>
@@ -412,7 +445,7 @@ const LKEY='toise-liste', LMAX=20;
 let last=null, list=[], lSort='recent', lSame=false, lPending=null;
 function lLoad(){try{const v=JSON.parse(localStorage.getItem(LKEY)||'[]'); list=Array.isArray(v)?v:[]}catch(e){list=[]}}
 function lSave(){try{localStorage.setItem(LKEY,JSON.stringify(list))}catch(e){}}
-try{const s=localStorage.getItem('toise-tri'); if(['recent','score','deg'].includes(s)) lSort=s}catch(e){}
+try{const s=localStorage.getItem('toise-tri'); if(['recent','score','deg','iv'].includes(s)) lSort=s}catch(e){}
 const sameKey=e=>[e.n,e.f,e.w,e.h,(e.iv||[]).join('/'),e.badge||''].join('|');
 function findSame(e){return list.find(x=>sameKey(x)===sameKey(e))}
 function addCurrent(){
@@ -427,29 +460,38 @@ function addCurrent(){
 function entryPoke(e){return P.find(p=>p.n===e.n&&p.f===e.f)||P.find(p=>p.n===e.n)}
 const mid=e=>(e.lo+e.hi)/2;
 function renderList(){
-  const ul=$('lList'), sp=cur;
+  const tb=$('lList'), sp=cur;
   let rows=list.slice();
   if(lSame) rows=rows.filter(e=>e.n===sp.n&&e.f===sp.f);
   if(lSort==='recent') rows.sort((a,b)=>b.t-a.t);
   else if(lSort==='score') rows.sort((a,b)=>mid(b)-mid(a));
+  else if(lSort==='iv') rows.sort((a,b)=>(b.pct??-1)-(a.pct??-1)||mid(b)-mid(a));
   else rows.sort((a,b)=>((b.k==='XXL')-(a.k==='XXL'))||((b.deg??-1)-(a.deg??-1))||(b.ratio-a.ratio));
-  $('lCount').textContent=list.length?`${list.length}/${LMAX}`:'';
-  $('lCtrl').hidden=!list.length; $('lFoot').hidden=!list.length;
-  $('lEmpty').hidden=!!list.length;
+  const has=!!list.length;
+  $('lCount').textContent=has?`${list.length}/${LMAX}`:'';
+  $('lCtrl').hidden=!has; $('lFoot').hidden=!has; $('lTab').hidden=!has; $('lLegend').hidden=!has;
+  $('lEmpty').hidden=has;
   $('lSame').textContent='Même espèce'+(lSame?` : ${full(sp)}`:'');
   $('lSame').setAttribute('aria-pressed',lSame);
   document.querySelectorAll('#lCtrl [data-sort]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.sort===lSort));
-  const sc=e=>{const a=Math.round(e.lo),b=Math.round(e.hi); return (b-a>=1?`${fmt(e.lo,0)}–${fmt(e.hi,0)}`:fmt(mid(e),0))+(e.partial?' *':'')};
+  document.querySelectorAll('#lTab th').forEach(th=>{const b=th.querySelector('[data-sort]'); th.classList.toggle('on',!!b&&b.dataset.sort===lSort)});
   const d=t=>new Date(t).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'});
-  ul.innerHTML = rows.length ? rows.map(e=>{const p=entryPoke(e); const nm=p?full(p):('n°'+e.n);
-    return `<li class="${p&&p===cur?'cur':''}"><button type="button" class="lopen" data-open="${e.id}" aria-label="Recharger ${nm}">
-      <span class="lrow1"><span class="pill ${e.k}">${e.k}</span><span class="lname">${nm}</span><span class="lscore">${sc(e)}</span></span>
-      <span class="lrow2">${[e.w?e.w.replace('.',',')+' kg':'', e.h.replace('.',',')+' m', e.pct!==null?`IV ${e.pct} %`:'', e.deg!==null?`XXL ${fmt(e.deg,0)} %`:'', d(e.t)]
-        .filter(Boolean).map(s=>`<span class="nw">${s.replace(/ /g,' ')}</span>`).join(' · ')}</span>
-    </button><button type="button" class="ldel" data-del="${e.id}" aria-label="Supprimer ${nm} de la liste">✕</button></li>`}).join('')
-    : (list.length?`<li><span class="lopen"><span class="lrow2">Aucun ${full(sp)} dans ta liste.</span></span></li>`:'');
-  ul.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{list=list.filter(e=>e.id!==b.dataset.del); lSave(); renderList(); compute()});
-  ul.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openEntry(list.find(e=>e.id===b.dataset.open)));
+  const num=s=>s?s.replace('.',','):'—';
+  const on=k=>lSort===k?' on':'';
+  tb.innerHTML = rows.length ? rows.map(e=>{const p=entryPoke(e); const nm=p?full(p):('n°'+e.n);
+    const a=Math.round(e.lo), z=Math.round(e.hi);
+    return `<tr class="${p&&p===cur?'cur':''}">
+      <td class="pk"><button type="button" class="lopen" data-open="${e.id}" aria-label="Recharger ${nm}">${nm}
+        <small><span class="pill ${e.k}">${e.k}</span>${d(e.t)}</small></button></td>
+      <td class="n sc${on('score')}">${fmt(mid(e),0)}${e.partial?'*':''}${z-a>=1?`<small>${fmt(e.lo,0)}–${fmt(e.hi,0)}</small>`:''}</td>
+      <td class="n${on('deg')}">${e.deg!==null?fmt(e.deg,0):'—'}</td>
+      <td class="n${on('iv')}">${e.pct!==null?e.pct:'—'}</td>
+      <td class="n tw">${num(e.h)}<small>${e.w?num(e.w):'—'}</small></td>
+      <td><button type="button" class="ldel" data-del="${e.id}" aria-label="Supprimer ${nm} de la liste">✕</button></td>
+    </tr>`}).join('')
+    : `<tr><td colspan="6" class="pk">Aucun ${full(sp)} dans ta liste.</td></tr>`;
+  tb.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{list=list.filter(e=>e.id!==b.dataset.del); lSave(); renderList(); compute()});
+  tb.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openEntry(list.find(e=>e.id===b.dataset.open)));
 }
 function openEntry(e){
   const p=entryPoke(e); if(!p) return;
@@ -459,7 +501,7 @@ function openEntry(e){
   badge=e.badge||null; compute(); renderList();
   $('mine').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
 }
-document.querySelectorAll('#lCtrl [data-sort]').forEach(b=>b.onclick=()=>{lSort=b.dataset.sort; try{localStorage.setItem('toise-tri',lSort)}catch(e){} renderList()});
+document.querySelectorAll('#lCtrl [data-sort], #lTab [data-sort]').forEach(b=>b.onclick=()=>{lSort=b.dataset.sort; try{localStorage.setItem('toise-tri',lSort)}catch(e){} renderList()});
 $('lSame').onclick=()=>{lSame=!lSame; renderList()};
 // « Tout effacer » : confirmation dans la page
 $('lClear').onclick=()=>{$('lConfirmTxt').textContent=`Effacer les ${list.length} Pokémon de ta liste ?`; $('lConfirm').hidden=false; $('lClear').hidden=true; $('lNo').focus()};
