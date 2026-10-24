@@ -1,5 +1,10 @@
 # Journal des mises à jour
 
+## 24 octobre 2026
+
+- **Mes derniers Pokémon** : bouton « Ajouter à ma liste » sous le score. La liste garde les 20 derniers Pokémon ajoutés, sur le téléphone. Tri par date, par score ou par degré XXL, filtre « Même espèce », suppression une à une ou « Tout effacer » (avec confirmation). Toucher une ligne recharge le Pokémon dans le calculateur.
+- **Chiffres plus lisibles** : nouvelle police pour les chiffres, le 0 ne ressemble plus au 8 sur iPhone (retour des testeurs).
+
 ## 15 octobre 2026
 
 - **Avis des testeurs** : bouton « Testeur ? Donner mon avis → » sous le titre, qui ouvre le questionnaire.
