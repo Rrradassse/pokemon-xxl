@@ -138,9 +138,10 @@ footer p{margin:0}
 .lscore{font-family:var(--f-mono);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
 .lrow2{font-family:var(--f-mono);font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .lrow2 .nw{white-space:nowrap}
-.inputs .full{grid-column:1/-1}
-.inputs .opt{font-size:.75rem;opacity:.8}
-.inputs #tag{font-family:var(--f-body)}
+.addzone{display:grid;gap:10px;border-top:1px solid var(--line);padding-top:12px}
+.addzone label{display:grid;gap:4px;font-size:.85rem;color:var(--muted)}
+.addzone .opt{font-size:.75rem;opacity:.8}
+.addzone input{font:inherit;font-size:1.05rem;padding:.55rem .6rem;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);width:100%}
 .ltab .ltag{font:inherit;font-family:var(--f-mono);font-size:.72rem;margin-top:3px;padding:1px 6px;border-radius:5px;border:1px solid var(--line);background:var(--paper);color:var(--ink);text-decoration:none;cursor:pointer;max-width:5.5rem;white-space:normal;overflow-wrap:anywhere;text-align:left;display:block}
 .toast{margin:0;padding:8px 10px;border-radius:8px;background:var(--ink);color:var(--paper);font-size:.85rem}
 .ltab{overflow-x:auto;margin-inline:-4px}
@@ -203,7 +204,6 @@ footer p{margin:0}
   <section class="card">
     <p class="label">Mon Pokémon <span class="ex" id="exTag">exemple</span></p>
     <form class="inputs" id="mine" autocomplete="off">
-      <label for="tag" class="full">PC ou surnom <span class="opt">facultatif, pour le retrouver dans ta liste</span><input id="tag" type="text" maxlength="20" placeholder="ex. 374 ou Gros Paras" autocapitalize="sentences" enterkeyhint="next"></label>
       <label for="w">Poids (kg)<input id="w" type="number" inputmode="decimal" step="0.01" min="0"></label>
       <label for="h">Taille (m)<input id="h" type="number" inputmode="decimal" step="0.01" min="0"></label>
       <div id="ambBox" class="amb" role="group" aria-labelledby="ambQ" hidden></div>
@@ -215,6 +215,10 @@ footer p{margin:0}
       </div>
     </form>
     <div class="verdict" id="verdict"></div>
+    <div class="addzone" id="addZone" hidden>
+      <label for="tag">PC ou surnom <span class="opt">facultatif, pour le retrouver dans ta liste</span><input id="tag" type="text" maxlength="20" placeholder="ex. 374 ou Gros Paras" autocapitalize="sentences" enterkeyhint="done"></label>
+      <div class="addrow"><button type="button" class="addbtn" id="addBtn">＋ Ajouter à ma liste</button><span class="addmsg" id="addMsg" role="status"></span></div>
+    </div>
   </section>
 
   <section class="card">
@@ -390,7 +394,7 @@ function compute(){
     if(v.every(x=>x!==null)){const s=v[0]+v[1]+v[2]; o.textContent=Math.round(s/45*100)+' %'; o.title=s+'/45'; o.classList.toggle('top',s===45)}
     else {o.textContent='—'; o.title=''; o.classList.remove('top')}
   }
-  const mk=$('marker'), out=$('verdict'); $('ambBox').hidden=true; last=null;
+  const mk=$('marker'), out=$('verdict'); $('ambBox').hidden=true; $('addZone').hidden=true; last=null;
   if(special(p)){mk.hidden=true; out.innerHTML='<p class="note">Pas de score XXL calculable pour cette forme.</p>'; return}
   if(!(h>0)){mk.hidden=true; out.innerHTML=`<p class="note">Saisis la taille et le poids lus sur la fiche du Pokémon dans le jeu, et ses IV si tu les connais (évaluation du chef d'équipe).</p>`; return}
   const lo=+$('ruler').dataset.lo, span=+$('ruler').dataset.span;
@@ -429,16 +433,14 @@ function compute(){
       <span class="tot">Score Exposition estimé</span><span class="r tot">${rng(totLo,totHi)}${(wp===null||ivp===null)?' *':''}</span>
     </div>
     <p class="note">Le jeu arrondit la taille au centimètre : ici 1 cm vaut ${fmt(800/(p.xxl*100),1)} points, d'où une fourchette. Le score affiché au PokéStop tombe dedans.</p>
-    ${(wp===null||ivp===null)?'<p class="note">* Score partiel : ajoute le poids et les IV pour le total complet.</p>':''}
-    <div class="addrow"><button type="button" class="addbtn" id="addBtn">＋ Ajouter à ma liste</button><span class="addmsg" id="addMsg" role="status"></span></div>`;
+    ${(wp===null||ivp===null)?'<p class="note">* Score partiel : ajoute le poids et les IV pour le total complet.</p>':''}`;
   // résultat courant, prêt à être ajouté à la liste
   const ivs=ivv.every(v=>v!==null)?ivv:null;
   last={n:p.n,f:p.f,tag:$('tag').value.trim(),w:$('w').value,h:$('h').value,iv:ivs,badge:amb?badge:null,k,deg,ratio,
         lo:totLo,hi:totHi,partial:(wp===null||ivp===null),pct:ivs?Math.round((ivs[0]+ivs[1]+ivs[2])/45*100):null};
-  const ab=$('addBtn');
+  const ab=$('addBtn'); $('addZone').hidden=false; ab.disabled=false; $('addMsg').textContent='';
   if(amb&&!badge){ab.disabled=true; $('addMsg').textContent='Choisis d\'abord le badge XL ou XXL.'}
   else if(findSame(last)){ab.disabled=true; $('addMsg').innerHTML='Déjà dans ta liste. <a href="#liste">Voir ma liste ↓</a>'}
-  ab.onclick=addCurrent;
   const box=$('ambBox'); box.hidden=!amb; box.classList.toggle('done',!!badge);
   if(amb){
     box.innerHTML=`<p id="ambQ">${badge?`Badge du jeu : ${badge}. Touche l'autre si tu t'es trompée.`:`${fmt(h)} m est pile sur le seuil ${kLo} / ${kHi} : quel badge affiche le jeu au-dessus de la taille ?`}</p>
@@ -527,6 +529,8 @@ $('lClear').onclick=()=>{$('lConfirmTxt').textContent=`Effacer les ${list.length
 $('lNo').onclick=()=>{$('lConfirm').hidden=true; $('lClear').hidden=false};
 $('lYes').onclick=()=>{list=[]; lSave(); $('lConfirm').hidden=true; $('lClear').hidden=false; renderList(); compute()};
 lLoad();
+$('addBtn').onclick=addCurrent;
+$('tag').addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault(); if(!$('addBtn').disabled) addCurrent()}});
 
 // --- démarrage : dernier Pokémon consulté, lien #n°, ou exemple Pikachu
 let start=null;
