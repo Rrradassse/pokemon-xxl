@@ -11,7 +11,7 @@
 <style>body{margin:0}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 <title>Toise XXL</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=Spline+Sans+Mono:wght@400;600&display=swap">
 <style>
 /* Layout : une colonne façon carnet de terrain — recherche, fiche, toise graduée, calcul, famille */
 :root{
@@ -20,7 +20,7 @@
   --warn:#a5461f; --good:#1f6f5c; --callout:#fbf1d3;
   --f-display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
   --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  --f-mono:"Spline Sans Mono",ui-monospace,Menlo,Consolas,monospace; /* zéro sans point ni barre : ne se confond pas avec le 8 */
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#121815; --paper:#1a221e; --ink:#e4ebe6; --muted:#9aa8a0; --line:#2f3b35;
@@ -32,6 +32,7 @@
   --warn:#e58a5f; --good:#5cc3a6; --callout:#3a321a; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.45}
+.wrap>*{min-width:0}
 .wrap{max-width:640px;margin:0 auto;padding-inline:16px;padding-block:20px 48px;display:grid;gap:18px}
 header h1{font-family:var(--f-display);font-weight:700;font-size:2.4rem;letter-spacing:.02em;margin:0;line-height:1;text-transform:uppercase}
 header h1 span{color:var(--xxl)}
@@ -115,6 +116,60 @@ tr.cur td{background:var(--m)}
 td button{font:inherit;background:none;border:0;color:var(--accent);cursor:pointer;padding:0;text-align:left;text-decoration:underline;text-underline-offset:2px}
 footer{font-size:.78rem;color:var(--muted);display:grid;gap:6px}
 footer p{margin:0}
+/* liste des derniers Pokémon */
+.addrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.addbtn{font:inherit;font-weight:700;font-size:.95rem;padding:.6rem 1rem;border-radius:10px;border:0;background:var(--accent);color:var(--accent-ink);cursor:pointer}
+.addbtn:disabled{opacity:.55;cursor:default}
+.addmsg{font-size:.85rem;color:var(--muted)}
+.addmsg a{color:var(--accent)}
+.lhead{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.lctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.seg button{font:inherit;font-size:.85rem;padding:.3rem .7rem;border:0;background:transparent;color:var(--ink);cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.lst{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.lst li{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:stretch;border:1px solid var(--line);border-radius:10px;background:var(--bg);min-width:0}
+.lst li.cur{border-color:var(--accent)}
+.lopen{font:inherit;text-align:left;background:none;border:0;color:var(--ink);padding:8px 10px;cursor:pointer;display:grid;gap:3px;min-width:0}
+.lrow1{display:flex;align-items:center;gap:8px;min-width:0}
+.lrow1 .pill{font-family:var(--f-display);font-weight:700;font-size:.85rem;padding:0 .45rem;border-radius:5px}
+.lname{font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lscore{font-family:var(--f-mono);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.lrow2{font-family:var(--f-mono);font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.lrow2 .nw{white-space:nowrap}
+.addzone{display:grid;gap:10px;border-top:1px solid var(--line);padding-top:12px}
+.addzone label{display:grid;gap:4px;font-size:.85rem;color:var(--muted)}
+.addzone .opt{font-size:.75rem;opacity:.8}
+.addzone input{font:inherit;font-size:1.05rem;padding:.55rem .6rem;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);width:100%}
+.ltab .ltag{font:inherit;font-family:var(--f-mono);font-size:.72rem;margin-top:3px;padding:1px 6px;border-radius:5px;border:1px solid var(--line);background:var(--paper);color:var(--ink);text-decoration:none;cursor:pointer;max-width:5.5rem;white-space:normal;overflow-wrap:anywhere;text-align:left;display:block}
+.toast{margin:0;padding:8px 10px;border-radius:8px;background:var(--ink);color:var(--paper);font-size:.85rem}
+.ltab{overflow-x:auto;margin-inline:-4px}
+.ltab table{width:100%;border-collapse:collapse;font-size:.85rem}
+.ltab th{padding:6px 4px;vertical-align:bottom;line-height:1.15}
+.ltab th small{font-weight:400;text-transform:none;letter-spacing:0}
+.ltab th button{font:inherit;text-transform:inherit;letter-spacing:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px}
+.ltab th.on{color:var(--accent)}
+.ltab th.on button::after{content:" ▼";font-size:.7em}
+.ltab td{padding:7px 4px;vertical-align:middle;white-space:nowrap}
+.ltab td.n,.ltab th.n{text-align:right}
+.ltab td.on{font-weight:700;color:var(--ink)}
+.ltab td.pk{white-space:normal;min-width:5.5rem;font-family:var(--f-body)}
+.ltab tr.cur td{background:var(--m)}
+.ltab .lopen{color:var(--ink);text-decoration:none;text-align:left;padding:0;display:grid;gap:2px;font-weight:700}
+.ltab .lopen small{font-family:var(--f-mono);font-weight:400;color:var(--muted);font-size:.72rem;display:flex;gap:5px;align-items:center}
+.ltab .lopen .pill{font-family:var(--f-display);font-weight:700;font-size:.72rem;padding:0 .3rem;border-radius:4px;color:var(--ink)}
+.ltab .lopen .pill.XXL{color:#1d1a10}
+.ltab td.tw small{display:block;font-size:.72rem;color:var(--muted)}
+.ltab td.sc small{display:block;font-size:.68rem;color:var(--muted);font-weight:400}
+.ltab .ldel{color:var(--muted);text-decoration:none;width:30px;height:34px;border:0;border-radius:8px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.ldel{font:inherit;font-size:1.1rem;width:44px;border:0;border-left:1px solid var(--line);background:none;color:var(--muted);cursor:pointer;border-radius:0 10px 10px 0}
+.ldel:hover{color:var(--warn)}
+.lfoot{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lclear,.lcancel{font:inherit;font-size:.85rem;padding:.35rem .8rem;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.lconfirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:.9rem;font-weight:700}
+.ldanger{font:inherit;font-size:.85rem;font-weight:700;padding:.35rem .8rem;border-radius:8px;border:0;background:var(--warn);color:var(--paper);cursor:pointer}
 .ex{font-size:.75rem;background:var(--xxl);color:#1d1a10;padding:1px 6px;border-radius:4px;margin-left:.4rem;vertical-align:middle}
 </style>
 
@@ -160,12 +215,49 @@ footer p{margin:0}
       </div>
     </form>
     <div class="verdict" id="verdict"></div>
+    <div class="addzone" id="addZone" hidden>
+      <label for="tag">PC ou surnom <span class="opt">facultatif, pour le retrouver dans ta liste</span><input id="tag" type="text" maxlength="20" placeholder="ex. 374 ou Gros Paras" autocapitalize="sentences" enterkeyhint="done"></label>
+      <div class="addrow"><button type="button" class="addbtn" id="addBtn">＋ Ajouter à ma liste</button><span class="addmsg" id="addMsg" role="status"></span></div>
+    </div>
   </section>
 
   <section class="card">
     <p class="label">Famille d'évolution</p>
     <div class="fam"><table><thead><tr><th>Pokémon</th><th>XXL dès</th><th>Taille max</th><th>Poids max</th></tr></thead><tbody id="famBody"></tbody></table></div>
     <p class="note">La taille et le poids sont conservés en pourcentage à l'évolution : un XXL reste XXL une fois évolué, mais son score peut monter ou baisser selon la forme.</p>
+  </section>
+
+  <section class="card" id="liste">
+    <div class="lhead"><p class="label">Mes derniers Pokémon</p><span class="num" id="lCount"></span></div>
+    <div class="lctrl" id="lCtrl">
+      <div class="seg" role="group" aria-label="Trier la liste">
+        <button type="button" data-sort="recent" aria-pressed="true">Récents</button>
+        <button type="button" data-sort="score" aria-pressed="false">Score</button>
+        <button type="button" data-sort="deg" aria-pressed="false">Degré XXL</button>
+        <button type="button" data-sort="iv" aria-pressed="false">IV</button>
+      </div>
+      <button type="button" class="chip" id="lSame" aria-pressed="false">Même espèce</button>
+    </div>
+    <p class="toast" id="lToast" role="status" hidden></p>
+    <p class="note" id="lLegend">Score = ce que compte l'Exposition (taille, poids, IV, bonus XXL) · Degré XXL = la taille seule.</p>
+    <div class="ltab" id="lTab"><table>
+      <thead><tr>
+        <th scope="col">Pokémon</th>
+        <th scope="col" class="n"><button type="button" data-sort="score">Score</button></th>
+        <th scope="col" class="n"><button type="button" data-sort="deg">XXL</button><br><small>%</small></th>
+        <th scope="col" class="n"><button type="button" data-sort="iv">IV</button><br><small>%</small></th>
+        <th scope="col" class="n">Taille<br><small>m · kg</small></th>
+        <th scope="col"><span class="sr">Supprimer</span></th>
+      </tr></thead>
+      <tbody id="lList"></tbody>
+    </table></div>
+    <p class="note" id="lEmpty">Ta liste est vide. Saisis un Pokémon, puis touche « Ajouter à ma liste » sous le score pour le comparer plus tard.</p>
+    <div class="lfoot" id="lFoot">
+      <button type="button" class="lclear" id="lClear">Tout effacer</button>
+      <div class="lconfirm" id="lConfirm" hidden><span id="lConfirmTxt"></span>
+        <button type="button" class="ldanger" id="lYes">Oui, effacer</button><button type="button" class="lcancel" id="lNo">Annuler</button></div>
+    </div>
+    <p class="note">La liste est gardée sur ce téléphone, dans ce navigateur : 20 Pokémon au maximum, le plus ancien laisse sa place. Elle disparaît si tu effaces les données du navigateur.</p>
   </section>
 
   <footer>
@@ -233,7 +325,7 @@ q.addEventListener('keydown',e=>{
 q.addEventListener('blur',()=>setTimeout(()=>sugg.hidden=true,100));
 function pick(p,keepInputs){
   q.value=''; hits=[]; sugg.hidden=true; cur=p; badge=null;
-  if(!keepInputs){example=false; $('h').value=''; $('w').value=''}
+  if(!keepInputs){example=false; $('h').value=''; $('w').value=''; $('tag').value=''}
   try{localStorage.setItem('toise-last',p.i)}catch(e){}
   try{history.replaceState(null,'','#'+p.n)}catch(e){}
   render(); q.blur();
@@ -257,7 +349,7 @@ function render(){
     <div class="fact hl"><div class="k">Taille max</div><div class="v">${fmt(p.xxl,3)} m</div><div class="s">× ${fmt(c,2)} (plafond de l'espèce)</div></div>
     <div class="fact"><div class="k">Poids max pour le score</div><div class="v">≈ ${fmt(wMax(p))} kg</div><div class="s">× ${fmt(c+0.5,2)} le poids moyen</div></div>
     <div class="fact"><div class="k">Score max théorique</div><div class="v">1 178</div><div class="s">taille et poids max, IV 15/15/15</div></div>`;
-  drawRuler(); renderFam(); compute();
+  drawRuler(); renderFam(); compute(); renderList();
 }
 function drawRuler(){
   const p=cur, lo=p.xxs, hi=p.xxl, span=hi-lo||1, pos=x=>(x-lo)/span*100;
@@ -291,7 +383,7 @@ ivIds.forEach((id,k)=>{const el=$(id);
   el.addEventListener('focus',()=>el.select());});
 const ivVal=id=>{const v=$(id).value; return v===''||+v>15?null:+v};
 let badge=null; // badge XL/XXL lu dans le jeu, quand l'arrondi ne permet pas de trancher
-['h','w','iva','ivd','ivs'].forEach(id=>$(id).addEventListener('input',()=>{example=false; if(id==='h') badge=null; compute()}));
+['h','w','iva','ivd','ivs','tag'].forEach(id=>$(id).addEventListener('input',()=>{example=false; if(id==='h') badge=null; compute()}));
 $('mine').addEventListener('submit',e=>e.preventDefault());
 function cls(p,h){ if(h>p.xl) return 'XXL'; if(h>p.mu) return 'XL'; if(h>=p.ml) return 'M'; if(h>=p.xs) return 'XS'; return 'XXS'; }
 function compute(){
@@ -302,7 +394,7 @@ function compute(){
     if(v.every(x=>x!==null)){const s=v[0]+v[1]+v[2]; o.textContent=Math.round(s/45*100)+' %'; o.title=s+'/45'; o.classList.toggle('top',s===45)}
     else {o.textContent='—'; o.title=''; o.classList.remove('top')}
   }
-  const mk=$('marker'), out=$('verdict'); $('ambBox').hidden=true;
+  const mk=$('marker'), out=$('verdict'); $('ambBox').hidden=true; $('addZone').hidden=true; last=null;
   if(special(p)){mk.hidden=true; out.innerHTML='<p class="note">Pas de score XXL calculable pour cette forme.</p>'; return}
   if(!(h>0)){mk.hidden=true; out.innerHTML=`<p class="note">Saisis la taille et le poids lus sur la fiche du Pokémon dans le jeu, et ses IV si tu les connais (évaluation du chef d'équipe).</p>`; return}
   const lo=+$('ruler').dataset.lo, span=+$('ruler').dataset.span;
@@ -342,6 +434,13 @@ function compute(){
     </div>
     <p class="note">Le jeu arrondit la taille au centimètre : ici 1 cm vaut ${fmt(800/(p.xxl*100),1)} points, d'où une fourchette. Le score affiché au PokéStop tombe dedans.</p>
     ${(wp===null||ivp===null)?'<p class="note">* Score partiel : ajoute le poids et les IV pour le total complet.</p>':''}`;
+  // résultat courant, prêt à être ajouté à la liste
+  const ivs=ivv.every(v=>v!==null)?ivv:null;
+  last={n:p.n,f:p.f,tag:$('tag').value.trim(),w:$('w').value,h:$('h').value,iv:ivs,badge:amb?badge:null,k,deg,ratio,
+        lo:totLo,hi:totHi,partial:(wp===null||ivp===null),pct:ivs?Math.round((ivs[0]+ivs[1]+ivs[2])/45*100):null};
+  const ab=$('addBtn'); $('addZone').hidden=false; ab.disabled=false; $('addMsg').textContent='';
+  if(amb&&!badge){ab.disabled=true; $('addMsg').textContent='Choisis d\'abord le badge XL ou XXL.'}
+  else if(findSame(last)){ab.disabled=true; $('addMsg').innerHTML='Déjà dans ta liste. <a href="#liste">Voir ma liste ↓</a>'}
   const box=$('ambBox'); box.hidden=!amb; box.classList.toggle('done',!!badge);
   if(amb){
     box.innerHTML=`<p id="ambQ">${badge?`Badge du jeu : ${badge}. Touche l'autre si tu t'es trompée.`:`${fmt(h)} m est pile sur le seuil ${kLo} / ${kHi} : quel badge affiche le jeu au-dessus de la taille ?`}</p>
@@ -349,6 +448,89 @@ function compute(){
     box.querySelectorAll('[data-badge]').forEach(b=>b.onclick=()=>{badge=b.dataset.badge; compute()});
   }
 }
+
+// --- liste des derniers Pokémon (gardée dans le navigateur de ce téléphone)
+const LKEY='toise-liste', LMAX=20;
+let last=null, list=[], lSort='recent', lSame=false, lPending=null;
+function lLoad(){try{const v=JSON.parse(localStorage.getItem(LKEY)||'[]'); list=Array.isArray(v)?v:[]}catch(e){list=[]}}
+function lSave(){try{localStorage.setItem(LKEY,JSON.stringify(list))}catch(e){}}
+try{const s=localStorage.getItem('toise-tri'); if(['recent','score','deg','iv'].includes(s)) lSort=s}catch(e){}
+const sameKey=e=>[e.n,e.f,e.tag||'',e.w,e.h,(e.iv||[]).join('/'),e.badge||''].join('|');
+// PC ou surnom : un nombre est un PC (recherche « pc374 » dans le jeu), sinon c'est un surnom
+const isPC=s=>/^\d{1,5}$/.test(s);
+const tagLabel=s=>isPC(s)?'PC '+s:'« '+s+' »';
+const searchOf=s=>isPC(s)?'pc'+s:s;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function copySearch(s){
+  const say=m=>{const el=$('lToast'); el.textContent=m; el.hidden=false; clearTimeout(copySearch.t); copySearch.t=setTimeout(()=>el.hidden=true,3500)};
+  const ok=()=>say(`Copié : « ${s} ». Colle-le dans la recherche de ton stockage Pokémon GO.`);
+  const ko=()=>say(`Tape « ${s} » dans la recherche de ton stockage Pokémon GO.`);
+  try{navigator.clipboard.writeText(s).then(ok,ko)}catch(e){ko()}
+}
+function findSame(e){return list.find(x=>sameKey(x)===sameKey(e))}
+function addCurrent(){
+  if(!last||findSame(last)) return;
+  const e=Object.assign({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),t:Date.now()},last);
+  list.unshift(e);
+  const dropped=list.length>LMAX ? list.sort((a,b)=>b.t-a.t).splice(LMAX) : [];
+  lSave(); renderList();
+  const ab=$('addBtn'); if(ab) ab.disabled=true;
+  const m=$('addMsg'); if(m) m.innerHTML=`Ajouté (${list.length}/${LMAX})${dropped.length?' · le plus ancien a laissé sa place':''}. <a href="#liste">Voir ma liste ↓</a>`;
+}
+function entryPoke(e){return P.find(p=>p.n===e.n&&p.f===e.f)||P.find(p=>p.n===e.n)}
+const mid=e=>(e.lo+e.hi)/2;
+function renderList(){
+  const tb=$('lList'), sp=cur;
+  let rows=list.slice();
+  if(lSame) rows=rows.filter(e=>e.n===sp.n&&e.f===sp.f);
+  if(lSort==='recent') rows.sort((a,b)=>b.t-a.t);
+  else if(lSort==='score') rows.sort((a,b)=>mid(b)-mid(a));
+  else if(lSort==='iv') rows.sort((a,b)=>(b.pct??-1)-(a.pct??-1)||mid(b)-mid(a));
+  else rows.sort((a,b)=>((b.k==='XXL')-(a.k==='XXL'))||((b.deg??-1)-(a.deg??-1))||(b.ratio-a.ratio));
+  const has=!!list.length;
+  $('lCount').textContent=has?`${list.length}/${LMAX}`:'';
+  $('lCtrl').hidden=!has; $('lFoot').hidden=!has; $('lTab').hidden=!has; $('lLegend').hidden=!has;
+  $('lEmpty').hidden=has;
+  $('lSame').textContent='Même espèce'+(lSame?` : ${full(sp)}`:'');
+  $('lSame').setAttribute('aria-pressed',lSame);
+  document.querySelectorAll('#lCtrl [data-sort]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.sort===lSort));
+  document.querySelectorAll('#lTab th').forEach(th=>{const b=th.querySelector('[data-sort]'); th.classList.toggle('on',!!b&&b.dataset.sort===lSort)});
+  const d=t=>new Date(t).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'});
+  const num=s=>s?s.replace('.',','):'—';
+  const on=k=>lSort===k?' on':'';
+  tb.innerHTML = rows.length ? rows.map(e=>{const p=entryPoke(e); const nm=p?full(p):('n°'+e.n);
+    const a=Math.round(e.lo), z=Math.round(e.hi);
+    return `<tr class="${p&&p===cur?'cur':''}">
+      <td class="pk"><button type="button" class="lopen" data-open="${e.id}" aria-label="Recharger ${nm}">${nm}
+        <small><span class="pill ${e.k}">${e.k}</span>${e.tag?'':d(e.t)}</small></button>${e.tag?`<button type="button" class="ltag" data-copy="${esc(searchOf(e.tag))}" title="Copier pour la recherche du jeu">${esc(tagLabel(e.tag))}</button>`:''}</td>
+      <td class="n sc${on('score')}">${fmt(mid(e),0)}${e.partial?'*':''}${z-a>=1?`<small>${fmt(e.lo,0)}–${fmt(e.hi,0)}</small>`:''}</td>
+      <td class="n${on('deg')}">${e.deg!==null?fmt(e.deg,0):'—'}</td>
+      <td class="n${on('iv')}">${e.pct!==null?e.pct:'—'}</td>
+      <td class="n tw">${num(e.h)}<small>${e.w?num(e.w):'—'}</small></td>
+      <td><button type="button" class="ldel" data-del="${e.id}" aria-label="Supprimer ${nm} de la liste">✕</button></td>
+    </tr>`}).join('')
+    : `<tr><td colspan="6" class="pk">Aucun ${full(sp)} dans ta liste.</td></tr>`;
+  tb.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{list=list.filter(e=>e.id!==b.dataset.del); lSave(); renderList(); compute()});
+  tb.querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>copySearch(b.dataset.copy));
+  tb.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openEntry(list.find(e=>e.id===b.dataset.open)));
+}
+function openEntry(e){
+  const p=entryPoke(e); if(!p) return;
+  pick(p,true); example=false;
+  $('w').value=e.w||''; $('h').value=e.h; $('tag').value=e.tag||'';
+  ivIds.forEach((id,k)=>$(id).value=e.iv?String(e.iv[k]):'');
+  badge=e.badge||null; compute(); renderList();
+  $('mine').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+}
+document.querySelectorAll('#lCtrl [data-sort], #lTab [data-sort]').forEach(b=>b.onclick=()=>{lSort=b.dataset.sort; try{localStorage.setItem('toise-tri',lSort)}catch(e){} renderList()});
+$('lSame').onclick=()=>{lSame=!lSame; renderList()};
+// « Tout effacer » : confirmation dans la page
+$('lClear').onclick=()=>{$('lConfirmTxt').textContent=`Effacer les ${list.length} Pokémon de ta liste ?`; $('lConfirm').hidden=false; $('lClear').hidden=true; $('lNo').focus()};
+$('lNo').onclick=()=>{$('lConfirm').hidden=true; $('lClear').hidden=false};
+$('lYes').onclick=()=>{list=[]; lSave(); $('lConfirm').hidden=true; $('lClear').hidden=false; renderList(); compute()};
+lLoad();
+$('addBtn').onclick=addCurrent;
+$('tag').addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault(); if(!$('addBtn').disabled) addCurrent()}});
 
 // --- démarrage : dernier Pokémon consulté, lien #n°, ou exemple Pikachu
 let start=null;

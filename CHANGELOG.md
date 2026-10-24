@@ -1,5 +1,11 @@
 # Journal des mises à jour
 
+## 24 octobre 2026
+
+- **Mes derniers Pokémon** : bouton « Ajouter à ma liste » sous le score. Les 20 derniers Pokémon ajoutés s'affichent dans un tableau (score, degré XXL, IV, taille et poids), gardé sur le téléphone. Tri par date, score, degré XXL ou IV (aussi en touchant l'en-tête de colonne), filtre « Même espèce », suppression une à une ou « Tout effacer » (avec confirmation). Toucher un nom recharge le Pokémon dans le calculateur.
+- **PC ou surnom** : case facultative juste au-dessus du bouton « Ajouter à ma liste ». Elle s'affiche sous le nom dans la liste ; la toucher copie « pc374 » (ou le surnom) pour le retrouver avec la recherche du stockage Pokémon GO.
+- **Chiffres plus lisibles** : nouvelle police pour les chiffres, le 0 ne ressemble plus au 8 sur iPhone (retour des testeurs).
+
 ## 15 octobre 2026
 
 - **Avis des testeurs** : bouton « Testeur ? Donner mon avis → » sous le titre, qui ouvre le questionnaire.
