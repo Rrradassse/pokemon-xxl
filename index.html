@@ -413,6 +413,7 @@ function compute(){
     const v=ivIds.map(ivVal), ivs=v.every(x=>x!==null)?v:null;
     out.innerHTML=`<div class="badge"><span class="pill ${k}">${k}</span></div>
       ${deg!==null?`<div><div class="score"><span>Degré XXL (seuil → max)</span><span class="r">${fmt(deg,0)} %</span></div><div class="gauge"><div style="width:${deg}%"></div></div></div>`:''}
+      ${h>p.xxl+0.005?`<p class="note warn">Cette taille dépasse le maximum de cette forme (${fmt(p.xxl,2)} m) : vérifie la forme choisie (Mini, Normale, Maxi ou Ultra) ou la saisie.</p>`:''}
       <p class="note">Pour cette forme, la taille dépend de la forme (Mini à Ultra) : pas de score d'Exposition calculable. Tu peux quand même l'ajouter à ta liste.</p>`;
     last={n:p.n,f:p.f,tag:$('tag').value.trim(),w:$('w').value,h:$('h').value,iv:ivs,badge:null,k,deg,ratio:h/p.h,
           lo:null,hi:null,partial:false,pct:ivs?Math.round((ivs[0]+ivs[1]+ivs[2])/45*100):null};
