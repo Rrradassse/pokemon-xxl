@@ -4,6 +4,7 @@
 
 - **Pitrouille et Banshitrouye** : la catégorie (XXL…) et le degré XXL s'affichent, et on peut les ajouter à la liste avec un PC ou un surnom. Le score d'Exposition reste non calculable pour ces formes (« — » dans la liste).
 - **Famille d'évolution** : le texte n'est plus coupé pour ces formes ; les seuils s'affichent quand la forme a une plage XXL.
+- **Taille impossible** : pour ces formes, un message prévient si la taille saisie dépasse le maximum de la forme choisie (Mini, Normale, Maxi ou Ultra).
 
 ## 24 octobre 2026 (soir)
 
