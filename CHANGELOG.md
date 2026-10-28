@@ -1,5 +1,11 @@
 # Journal des mises à jour
 
+## 27 octobre 2026
+
+- **Pitrouille et Banshitrouye** : la catégorie (XXL…) et le degré XXL s'affichent, et on peut les ajouter à la liste avec un PC ou un surnom. Le score d'Exposition reste non calculable pour ces formes (« — » dans la liste).
+- **Famille d'évolution** : le texte n'est plus coupé pour ces formes ; les seuils s'affichent quand la forme a une plage XXL.
+- **Taille impossible** : pour ces formes, un message prévient si la taille saisie dépasse le maximum de la forme choisie (Mini, Normale, Maxi ou Ultra).
+
 ## 24 octobre 2026 (soir)
 
 - **Logo** : nouveau logo à côté du titre, et vraie icône sur l'écran d'accueil du téléphone et dans l'onglet du navigateur (à la place du « G » gris). Pour l'avoir sur un raccourci déjà créé : le supprimer puis l'ajouter de nouveau à l'écran d'accueil.

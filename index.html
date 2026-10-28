@@ -120,6 +120,7 @@ header p{margin:.35rem 0 0;color:var(--muted);font-size:.95rem}
 table{width:100%;border-collapse:collapse;font-size:.9rem}
 th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;padding:4px 6px;border-bottom:1px solid var(--line)}
 td{padding:7px 6px;border-bottom:1px solid var(--line);font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td.wrap{white-space:normal;font-family:var(--f-body);color:var(--muted)}
 td:first-child{font-family:var(--f-body);white-space:normal}
 tr.cur td{background:var(--m)}
 td button{font:inherit;background:none;border:0;color:var(--accent);cursor:pointer;padding:0;text-align:left;text-decoration:underline;text-underline-offset:2px}
@@ -378,7 +379,7 @@ function renderFam(){
   const seen=new Set(); fam=fam.filter(x=>{const k=x.n+'|'+x.f; if(seen.has(k))return false; seen.add(k); return true});
   fam.sort((a,b)=>a.d-b.d||a.n-b.n);
   $('famBody').innerHTML=fam.map(x=>`<tr class="${x===p?'cur':''}"><td><button type="button" data-i="${x.i}">${full(x)}</button></td>`+
-    (special(x)?`<td colspan="3">taille fixée par la forme</td>`:`<td>${fmt(x.xl,2)} m</td><td>${fmt(x.xxl,2)} m</td><td>${fmt(wMax(x),1)} kg</td>`)+`</tr>`).join('');
+    (special(x)?(x.xxl>x.xl?`<td>${fmt(x.xl,2)} m</td><td>${fmt(x.xxl,2)} m</td><td>—</td>`:`<td colspan="3" class="wrap">Pas de XXL pour cette forme</td>`):`<td>${fmt(x.xl,2)} m</td><td>${fmt(x.xxl,2)} m</td><td>${fmt(wMax(x),1)} kg</td>`)+`</tr>`).join('');
   $('famBody').querySelectorAll('button').forEach(b=>b.onclick=()=>pick(P[+b.dataset.i],true));
 }
 
@@ -404,7 +405,21 @@ function compute(){
     else {o.textContent='—'; o.title=''; o.classList.remove('top')}
   }
   const mk=$('marker'), out=$('verdict'); $('ambBox').hidden=true; $('addZone').hidden=true; last=null;
-  if(special(p)){mk.hidden=true; out.innerHTML='<p class="note">Pas de score XXL calculable pour cette forme.</p>'; return}
+  if(special(p)){ // Pitrouille / Banshitrouye : la catégorie se lit sur la toise, mais pas de score d'Exposition calculable
+    if(!(h>0)){mk.hidden=true; out.innerHTML='<p class="note">Saisis la taille lue dans le jeu pour voir la catégorie. Pour cette forme, la taille dépend de la forme (Mini à Ultra) : pas de score d\'Exposition calculable.</p>'; return}
+    const lo=+$('ruler').dataset.lo, span=+$('ruler').dataset.span;
+    mk.hidden=false; mk.style.left=Math.max(0,Math.min(100,(h-lo)/span*100))+'%'; $('markerTxt').textContent=fmt(h)+' m';
+    const k=cls(p,h), deg=(k==='XXL'&&p.xxl>p.xl)?Math.min(100,Math.max(0,(h-p.xl)/(p.xxl-p.xl)*100)):null;
+    const v=ivIds.map(ivVal), ivs=v.every(x=>x!==null)?v:null;
+    out.innerHTML=`<div class="badge"><span class="pill ${k}">${k}</span></div>
+      ${deg!==null?`<div><div class="score"><span>Degré XXL (seuil → max)</span><span class="r">${fmt(deg,0)} %</span></div><div class="gauge"><div style="width:${deg}%"></div></div></div>`:''}
+      ${h>p.xxl+0.005?`<p class="note warn">Cette taille dépasse le maximum de cette forme (${fmt(p.xxl,2)} m) : vérifie la forme choisie (Mini, Normale, Maxi ou Ultra) ou la saisie.</p>`:''}
+      <p class="note">Pour cette forme, la taille dépend de la forme (Mini à Ultra) : pas de score d'Exposition calculable. Tu peux quand même l'ajouter à ta liste.</p>`;
+    last={n:p.n,f:p.f,tag:$('tag').value.trim(),w:$('w').value,h:$('h').value,iv:ivs,badge:null,k,deg,ratio:h/p.h,
+          lo:null,hi:null,partial:false,pct:ivs?Math.round((ivs[0]+ivs[1]+ivs[2])/45*100):null};
+    const ab=$('addBtn'); $('addZone').hidden=false; ab.disabled=false; $('addMsg').textContent='';
+    if(findSame(last)){ab.disabled=true; $('addMsg').innerHTML='Déjà dans ta liste. <a href="#liste">Voir ma liste ↓</a>'}
+    return}
   if(!(h>0)){mk.hidden=true; out.innerHTML=`<p class="note">Saisis la taille et le poids lus sur la fiche du Pokémon dans le jeu, et ses IV si tu les connais (évaluation du chef d'équipe).</p>`; return}
   const lo=+$('ruler').dataset.lo, span=+$('ruler').dataset.span;
   mk.hidden=false; mk.style.left=Math.max(0,Math.min(100,(h-lo)/span*100))+'%'; $('markerTxt').textContent=fmt(h)+' m';
@@ -487,7 +502,7 @@ function addCurrent(){
   const m=$('addMsg'); if(m) m.innerHTML=`Ajouté (${list.length}/${LMAX})${dropped.length?' · le plus ancien a laissé sa place':''}. <a href="#liste">Voir ma liste ↓</a>`;
 }
 function entryPoke(e){return P.find(p=>p.n===e.n&&p.f===e.f)||P.find(p=>p.n===e.n)}
-const mid=e=>(e.lo+e.hi)/2;
+const mid=e=>e.lo==null?-1:(e.lo+e.hi)/2;
 function renderList(){
   const tb=$('lList'), sp=cur;
   let rows=list.slice();
@@ -512,7 +527,7 @@ function renderList(){
     return `<tr class="${p&&p===cur?'cur':''}">
       <td class="pk"><button type="button" class="lopen" data-open="${e.id}" aria-label="Recharger ${nm}">${nm}
         <small><span class="pill ${e.k}">${e.k}</span>${e.tag?'':d(e.t)}</small></button>${e.tag?`<button type="button" class="ltag" data-copy="${esc(searchOf(e.tag))}" title="Copier pour la recherche du jeu">${esc(tagLabel(e.tag))}</button>`:''}</td>
-      <td class="n sc${on('score')}">${fmt(mid(e),0)}${e.partial?'*':''}${z-a>=1?`<small>${fmt(e.lo,0)}–${fmt(e.hi,0)}</small>`:''}</td>
+      <td class="n sc${on('score')}">${e.lo==null?'—':fmt(mid(e),0)+(e.partial?'*':'')+(z-a>=1?`<small>${fmt(e.lo,0)}–${fmt(e.hi,0)}</small>`:'')}</td>
       <td class="n${on('deg')}">${e.deg!==null?fmt(e.deg,0):'—'}</td>
       <td class="n${on('iv')}">${e.pct!==null?e.pct:'—'}</td>
       <td class="n tw">${num(e.h)}<small>${e.w?num(e.w):'—'}</small></td>
